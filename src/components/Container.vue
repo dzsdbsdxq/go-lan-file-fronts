@@ -24,18 +24,11 @@ export default {
   &-zone{
     &-page{
       display: flex;
-      -webkit-box-orient: vertical;
-      -moz-box-orient: vertical;
-      -o-box-orient: vertical;
-      -webkit-flex-direction: column;
-      -ms-flex-direction: column;
       flex-direction: column;
-      -webkit-box-pack: center;
-      -moz-box-pack: center;
-      -o-box-pack: center;
-      -ms-flex-pack: center;
-      -webkit-justify-content: center;
-      justify-content: center;
+      flex-wrap: nowrap;
+      justify-content: flex-end;
+      align-items: stretch;
+      align-content: stretch;
       height: 100%;
       min-height: 300px;
       padding: 40px 0px 0px 0px;
@@ -43,13 +36,13 @@ export default {
         color: #b11c17;
         font: 700 56px/64px Lobster Two,sans-serif;
         text-align: center;
-        margin: 0 0 10px;
+        margin: 0 0 25px;
       }
       p{
         color: #777;
         font: 18px/22px Quicksand,sans-serif;
         text-align: center;
-        margin: 0;
+        margin: 20px auto 10px auto;
       }
       small{
         color: #777;

@@ -2,7 +2,7 @@
   <div class="container">
     <div class="container-zone">
       <div class="container-zone-page">
-        <h1 class="container-zone-page-h1">FilePizza</h1>
+        <h1 class="container-zone-page-h1">文传</h1>
         <p>Free peer-to-peer file transfers in your browser.</p>
         <small class="container-zone-page-notice">We never store anything. Files only served fresh.</small>
       </div>
@@ -34,7 +34,8 @@ export default {
       padding: 40px 0px 0px 0px;
       &-h1{
         color: #b11c17;
-        font: 700 56px/64px Lobster Two,sans-serif;
+        font: 700 56px/64px YSZ-FZZH,sans-serif;
+        font-weight: 400;
         text-align: center;
         margin: 0 0 25px;
       }

@@ -109,9 +109,6 @@
         &:before {
           display: none;
         }
-        &:-webkit-details-marker {
-          display: none;
-        }
       }
     }
     &-process{

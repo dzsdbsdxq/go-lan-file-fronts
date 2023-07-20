@@ -17,6 +17,9 @@ module.exports = defineConfig({
         filename: `css/[name].[chunkhash:8].${Timestamp}.css`,
         chunkFilename: `css/[name].[chunkhash:8].${Timestamp}.css`
       })
-    ]
+    ],
+    devServer: {
+      historyApiFallback: true
+    },
   },
 })

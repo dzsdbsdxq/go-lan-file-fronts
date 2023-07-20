@@ -3,8 +3,8 @@
     <div class="container-zone">
       <div class="container-zone-page">
         <h1 class="container-zone-page-h1">文传</h1>
-        <p>Free peer-to-peer file transfers in your browser.</p>
-        <small class="container-zone-page-notice">We never store anything. Files only served fresh.</small>
+        <p>端到端实时在线文件分享服务。分享更私密，真正做到无痕迹.</p>
+        <small class="container-zone-page-notice">&gt;&gt;::&nbsp;&nbsp;服务器连接状态：【已连接】.已为您自动分配上传通道：fcb245b407b4f31f&nbsp;&nbsp;::&lt;&lt;</small>
       </div>
 
     </div>
@@ -33,7 +33,7 @@ export default {
       min-height: 300px;
       padding: 40px 0px 0px 0px;
       &-h1{
-        color: #b11c17;
+        color: #4d4b4b;
         font: 700 56px/64px YSZ-FZZH,sans-serif;
         font-weight: 400;
         text-align: center;
@@ -45,13 +45,13 @@ export default {
         text-align: center;
         margin: 20px auto 10px auto;
       }
-      small{
-        color: #777;
+      &-notice{
         font: 12px/22px Quicksand,sans-serif;
         text-align: center;
-        &.notice{
-          margin: 0 0 10px;
-        }
+        margin: 0 0 10px;
+        color: #4bb74c;
+        text-underline: #4bb74c;
+        text-decoration:underline;
       }
 
     }

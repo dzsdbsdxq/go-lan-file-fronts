@@ -5,16 +5,6 @@
 <template>
   <div class="main">
     <div class="main-down">
-      <div class="main-down-noStart" v-if="false"><button>选择一个文件</button></div>
-      <div class="main-down-process" v-if="false">
-        <div class="main-down-process-loading">
-          <div class="main-down-process-loading__loader">
-            <span class="main-down-process-loading__loader-text">上传中</span>
-            <span class="main-down-process-loading__loader-load"></span>
-          </div>
-        </div>
-        <div class="main-down-process-tips">上传进度:89%</div>
-      </div>
       <div class="main-down-finished">
         <p class="main-down-finished-fileName">charles-proxy-4.6.4_amd64.tar.gz</p>
         <p class="main-down-finished-fileInfo">

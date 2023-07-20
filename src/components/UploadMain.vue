@@ -6,18 +6,19 @@
 <div class="main">
   <div class="main-upload">
     <div class="main-upload-noStart" v-if="false"><button>选择一个文件</button></div>
-    <div class="main-upload-process" v-if="false">
+    <div class="main-upload-process" v-if="true">
       <div class="main-upload-process-loading">
-        <div class="main-upload-process-loading__loader">
-          <span class="main-upload-process-loading__loader-text">上传中</span>
-          <span class="main-upload-process-loading__loader-load"></span>
+        <p class="main-upload-process-loading__tips">上传进行中:</p>
+        <div class="main-upload-process-loading__row">
+          <div class="main-upload-process-loading__row-progress">
+            <div class="main-upload-process-loading__row-progress-bar" style="width: 85.69%;"></div>
+          </div>
+          <button class="main-upload-process-loading__row-pause">暂停</button>
         </div>
-
+        <p class="main-upload-process-loading__text">Uploaded 8.52 MB of 9.01 MB (94.60%)</p>
       </div>
-      <div class="main-upload-process-tips">上传进度:89%</div>
-
     </div>
-    <div class="main-upload-finished">
+    <div class="main-upload-finished" v-if="false">
       <p class="main-upload-finished-fileName">charles-proxy-4.6.4_amd64.tar.gz</p>
       <p class="main-upload-finished-fileInfo">
         <span>Peers: </span>
@@ -122,47 +123,81 @@
       height: 100%;
       margin: 0 auto;
       &-loading{
-        margin: 30px auto;
-        &__loader{
-          width: 80px;
-          height: 50px;
-          position: relative;
-          &-text{
-            position: absolute;
-            top: 0;
-            padding: 0;
-            margin: 0;
-            color: #C8B6FF;
-            animation: text_713 3.5s ease both infinite;
-            font-size: .8rem;
-            letter-spacing: 1px;
-          }
-          &-load {
-            background-color: #9A79FF;
-            border-radius: 50px;
-            display: block;
-            height: 16px;
-            width: 16px;
-            bottom: 0;
-            position: absolute;
-            transform: translateX(64px);
-            animation: loading_713 3.5s ease both infinite;
-            &::before {
-              position: absolute;
-              content: "";
-              width: 100%;
+        width:100%;
+        max-width: 1024px;
+        margin: 30px auto 1.5rem auto;
+        background-color: #fcfcfc;
+        border: 1px solid #ededed;
+        border-radius: 1rem;
+        padding:1.25rem 1.5rem;
+        &__tips{
+          display: flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          justify-content: flex-start;
+          align-items: center;
+          align-content: center;
+          font-weight: 700;
+          margin-bottom: .5rem;
+          margin-top: 0;
+          color: #171717;
+        }
+        &__row{
+          display: flex;
+          flex-wrap: nowrap;
+          gap: .75rem;
+          justify-content: space-between;
+          margin-bottom: .5rem;
+          &-progress{
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            box-shadow: 0 1px 1px #ededed inset;
+            flex: 1;
+            height: 2.5rem;
+            overflow: hidden;
+            &-bar{
+              animation: _stripes_1as67_1 2s linear infinite;
+              background-color: #48aa92;
+              background-image: linear-gradient(-45deg,hsla(0,0%,100%,.2) 25%,transparent 0,transparent 50%,hsla(0,0%,100%,.2) 0,hsla(0,0%,100%,.2) 75%,transparent 0,transparent);
+              background-size: 40px 40px;
+              box-shadow: inset 0 1px 1px #0000000d;
               height: 100%;
-              background-color: #D1C2FF;
-              border-radius: inherit;
-              animation: loading2_713 3.5s ease both infinite;
+              line-height: 2.5rem;
+              transition: width .25s ease,background-color .25s ease
             }
           }
-        }
-      }
-      &-tips{
-        color:#777;
-      }
+          &-pause{
+            background-color: transparent;
+            border: 1px solid #c7c7c7;
+            border-radius: .25rem;
+            color: #6f6f6f;
+            cursor: pointer;
+            display: inline-block;
+            font-size: .75rem;
+            font-weight: 600;
+            height: 2.5rem;
+            letter-spacing: 1px;
+            line-height: 2.5rem;
+            padding: 0 2rem;
+            text-align: center;
+            text-decoration: none;
+            text-transform: uppercase;
+            white-space: nowrap
+          }
 
+        }
+        &__text{
+          font-size: 14px;
+          color: #171717;
+          display: flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          justify-content: flex-start;
+          align-items: center;
+          align-content: center;
+        }
+
+      }
     }
     &-finished{
       display: flex;

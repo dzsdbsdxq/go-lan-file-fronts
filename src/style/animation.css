@@ -78,3 +78,12 @@
         width: 16px;
     }
 }
+@keyframes _stripes_1as67_1 {
+    0% {
+        background-position: -40px 0
+    }
+
+    to {
+        background-position: 0 0
+    }
+}

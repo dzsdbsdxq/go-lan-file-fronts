@@ -1,38 +1,41 @@
 <template>
   <footer class="footer">
     <p class="footer-p">
-      <strong>Like FilePizza?</strong>
+      <strong>File.SKI</strong>
       <span> Support its development! </span>
-      <a href="" class="footer-p-donate">donate</a>
+      <a href="javascript:void(0);" @click="alertDonateDialog" class="footer-p-donate">donate</a>
     </p>
     <p class="footer-p byline">
-      <span>Cooked up by</span>
-      <span> </span>
-      <a href="#" target="_blank">Alex Kern</a>
+      <span>2023 © File.Ski </span>
       <span> </span>
       <span>&amp;</span>
       <span> </span>
-      <a href="#" target="_blank">Neeraj Baid</a>
+      <span> Powered by</span>
       <span> </span>
-      <span>while eating </span>
-      <strong>Sliver</strong>
-      <span> @ UC Berkeley ·</span>
-      <span> </span>
-      <a href="#" target="_blank">FAQ</a>
-      <span> </span>
-      <span>·</span>
-      <span> </span>
-      <a href="#" target="_blank">Fork us</a>
+      <a href="https://www.haoba.cc" target="_blank"> 咸菜拌白饭</a>
+<!--      <strong>Sliver</strong>-->
+<!--      <span> @ UC Berkeley ·</span>-->
+<!--      <span> </span>-->
+<!--      <a href="#" target="_blank">FAQ</a>-->
+<!--      <span> </span>-->
+<!--      <span>·</span>-->
+<!--      <span> </span>-->
+<!--      <a href="#" target="_blank">Star us</a>-->
     </p>
-
   </footer>
+  <teleport to='body'>
+    <DonateDialog v-show="showDonate" v-on:closeDonate="alertDonateDialog"></DonateDialog>
+  </teleport>
 
 
 </template>
 
-<script>
-export default {
-  name: "Footer"
+<script setup>
+import {ref} from "vue";
+import DonateDialog from "@/components/DonateDialog.vue";
+const showDonate = ref(false)
+const alertDonateDialog = () => {
+  showDonate.value = !showDonate.value;
 }
 </script>
 

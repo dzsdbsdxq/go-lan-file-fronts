@@ -20,13 +20,13 @@ export default class SocketService {
     // 重新连接尝试的次数
     connectRetryCount = 0;
     //  定义连接服务器的方法
-    connect(roomId,userId,type){
+    connect(userId,type){
         let that = this;
         //连接服务器
         if (!window.WebSocket) {
             return console.log("您的浏览器不支持WebSocket");
         }
-        let url = config.websocket.url+"?shareId="+roomId + "&passId="+userId+"&platform=pc&type="+type;
+        let url = config.websocket.url+"?userId="+userId+"&platform=pc&type="+type;
         this.ws = new WebSocket(url);
         // 连接成功的事件
         this.ws.onopen = () => {
@@ -35,7 +35,7 @@ export default class SocketService {
             this.connected = true;
             // 重置重新连接的次数
             this.connectRetryCount = 0;
-            this.loginSystem(roomId,userId)
+            this.loginSystem(userId)
             // 定时心跳
             setInterval(this.heartbeat, 30 * 1000)
         };
@@ -47,54 +47,46 @@ export default class SocketService {
             this.connected = false;
             this.connectRetryCount++;
             store.dispatch("setErrorMsgAction", "服务关闭啦").then(r =>{})
-            store.dispatch("setPageStateAction", "error").then(r =>{})
 
-            this.setStatus(false,"","");
+            this.setStatus(false,"");
             setTimeout(() => {
-                this.connect(roomId,userId,type);
+                this.connect(userId,type);
             }, 500 * this.connectRetryCount);
         };
 
         // 得到服务端发送过来的数据
         this.ws.onmessage = msg => {
             let msgData = JSON.parse(msg.data)
-            //console.log(msgData);
-            switch (msgData.cmd) {
+            switch (msgData.Cmd) {
                 case "login":
-                    if(msgData.response.code == 200){
-                        //如果登录成功，设置缓存登录信息
-                        this.setStatus(true,userId,roomId);
-                    }
+                    //如果登录成功，设置缓存登录信息
+                    this.setStatus(true,userId);
                     break;
                 case "heartbeat":
                     let connect = false;
 
-                    if (msgData.response.code == 200){
+                    if (msgData.Response.code == 200){
                         connect = true;
                     }
-                    this.setStatus(connect,msgData.response.data.userId,msgData.response.data.roomId);
+                    this.setStatus(connect,msgData.Response.data.userId);
                     break;
                 case "enter":
-                    store.dispatch("setOnlineUserCountAction", parseInt(store.getters.getOnlineUserCount) + 1).then(r  =>{})
                     break;
                 case "exit":
-                    store.dispatch("setOnlineUserCountAction", parseInt(store.getters.getOnlineUserCount) - 1).then(r  =>{})
                     break;
                 case "msg":
-                    if (msgData.response.code == 200){
-                        config.editor.insert( ()=>{
-                            config.editor.clear();
-                            return {
-                                text:msgData.response.data.msg
-                            }
-                        })
+                    if (msgData.Response.code == 200){
+
                     }
+                    break;
+                case "complete":
+                    //store.dispatch("setShareUrlAction", msgData.Message.url).then(r =>{})
+                    //store.dispatch("setIsCompleteAction", true).then(r =>{})
                     break;
                 case "close":
                     //console.log("服务关闭啦");
-                    this.setStatus(false,"","");
+                    this.setStatus(false,"");
                     store.dispatch("setErrorMsgAction", "服务关闭啦").then(r =>{})
-                    store.dispatch("setPageStateAction", "error").then(r =>{})
                     break;
                 default:
 
@@ -110,10 +102,9 @@ export default class SocketService {
     unRegisterCallBack(socketType) {
         this.callBackMapping[socketType] = null;
     }
-    setStatus(connect,userId,roomId){
+    setStatus(connect,userId){
         store.dispatch("setIsConnectAction", connect).then(r => {});
         store.dispatch("setUserIdAction", userId).then(r => {});
-        store.dispatch("setRoomIdAction", roomId).then(r =>{} );
     }
 
     // 发送数据的方法
@@ -142,13 +133,12 @@ export default class SocketService {
             SocketService.Instance.ws.send(heartDataJson);
         }
     }
-    loginSystem(roomId,userId){
+    loginSystem(userId){
         let that = this;
         const data = {
             seq:utils.sendId(),
             cmd:"login",
             data:{
-                room_id:roomId,
                 user_id:userId,
                 token:""
             }

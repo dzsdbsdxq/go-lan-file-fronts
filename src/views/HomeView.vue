@@ -1,6 +1,6 @@
 <template>
   <Container></Container>
-  <upload-main></upload-main>
+  <upload-main :key="Math.random()"></upload-main>
 </template>
 <script>
 // @ is an alias to /src

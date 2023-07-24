@@ -55,14 +55,48 @@ export const utils = {
     }
     return random;
   },
-  isMobile(){
-    let mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (mobile) {
-      return true;
-    } else {
-      //假设小于等于 768px 的设备视为移动设备
-      return window.innerWidth <= 768;
+  bytesToSize: (bytes) => {
+    if (bytes === 0) return '0 B';
+    let k = 1000;
+    let sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    let i = Math.floor(Math.log(bytes) / Math.log(k));
+    return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
+  },
+  dateFormat: ( date,time) => {
+    const timestampToTime = (date) => {
+      let Y = date.getFullYear() + "年";
+      let M =
+          (date.getMonth() + 1 < 10
+              ? "0" + (date.getMonth() + 1)
+              : date.getMonth() + 1) + "月";
+      let D = (date.getDate() < 10 ? "0" + date.getDate() : date.getDate()) + "日";
+      return Y + M + D ;
     }
+
+    let dateJson = new Date(date).toJSON();
+
+    let myDateStr = new Date(+new Date(dateJson) + 8 * 3600 * 1000).toISOString().replace(/T/g, ' ').replace(/\.[\d]{3}Z/, '')
+    let myDate =  new Date(Date.parse(myDateStr.replace(/-/g,  "/")));
+    return timestampToTime(myDate);
+  },
+  getLastSegmentFromUrl:(url)=>{
+    // 使用URL对象来解析URL
+    const urlObj = new URL(url);
+
+    // 获取pathname（路径部分）并用斜杠进行分割
+    const segments = urlObj.pathname.split('/');
+
+    // 去除可能的空白和空段，获取最后一个非空段
+    let lastSegment = '';
+    for (let i = segments.length - 1; i >= 0; i--) {
+      if (segments[i].trim() !== '') {
+        lastSegment = segments[i];
+        break;
+      }
+    }
+    // 返回最后一个非空段
+    return lastSegment;
   }
+
 
 }

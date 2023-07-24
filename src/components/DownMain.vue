@@ -1,22 +1,67 @@
 <script setup>
+import {onBeforeMount, onMounted, reactive, ref} from "vue";
+import {useRoute} from "vue-router";
+import {fly} from "@/utils/request";
+import {utils} from "../utils/func";
+import Error from "@/components/Error.vue";
+import CountDown from "@/components/CountDown.vue";
+const route = useRoute()
+const state = reactive({
+  info:{},
+  url:"",
+  expireTime:0
+})
+const isLoading = ref(false)
+const errMessage = ref("")
+
+onBeforeMount(()=>{
+  let shareId = route.params.code != undefined ? route.params.code:"";
+  fly.get("api/file/"+shareId,{}).then( res => {
+    if(res.code == 200){
+      state.info = res.data;
+      state.url = res.data.url;
+      state.expireTime= res.data.expire;
+      isLoading.value = true;
+    }
+  }).catch(err => {
+    isLoading.value = false;
+    errMessage.value = err.data.message
+  })
+})
+const downloadFunc = () => {
+  let eleLink = document.createElement('a');
+  eleLink.download = state.info.file_name;
+  eleLink.style.display = 'none';
+  eleLink.href = state.url;
+  // 触发点击
+  document.body.appendChild(eleLink);
+  eleLink.click();
+  // 然后移除
+  document.body.removeChild(eleLink);
+}
 
 </script>
 
 <template>
   <div class="main">
-    <div class="main-down">
+    <div v-if="isLoading" class="main-down">
       <div class="main-down-finished">
-        <p class="main-down-finished-fileName">charles-proxy-4.6.4_amd64.tar.gz</p>
+        <p class="main-down-finished-fileName">{{state.info.file_name}}</p>
         <p class="main-down-finished-fileInfo">
-          <span>Peers: </span>
-          <span>0</span>
-          <span> · Up: </span>
-          <span>0 Bytes</span>
+          <span>Size: </span>
+          <span>{{utils.bytesToSize(state.info.file_size)}}</span>
+          <span> · Downloads: </span>
+          <span>{{state.info.downloads}}</span>
+          <span> · Views: </span>
+          <span>{{state.info.views}}</span>
+          <span> · Expiration time: </span>
+          <count-down  :end-time="state.expireTime"></count-down>
         </p>
         <div class="line-t-40"></div>
-        <button class="main-down-finished-download">Download</button>
+        <button @click="downloadFunc" class="main-down-finished-download">Download</button>
       </div>
     </div>
+    <error v-else :message="errMessage"></error>
   </div>
 </template>
 

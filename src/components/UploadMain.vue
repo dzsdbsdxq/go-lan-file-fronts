@@ -1,38 +1,170 @@
 <script setup>
+import {computed, onBeforeMount, reactive, ref, watch} from "vue";
+import {useRoute} from "vue-router";
+import store from "@/store";
+import {fly} from "@/utils/request";
+import SocketService from "@/utils/websocket";
+import useClipboard from 'vue-clipboard3'
+import * as tus from 'tus-js-client'
+import {utils} from "@/utils/func";
+import { createToaster } from "@meforma/vue-toaster";
+import CountDown from "@/components/CountDown.vue";
+const toaster = createToaster({ /* options */ });
+
+const { toClipboard } = useClipboard()
+const pageState = ref("noStart");
+const state = reactive({
+  progressText:"",
+  fileName:"",
+  fileSize:0,
+  progressBar:"",
+  fileInfo:{},
+  shareUrl : "",
+  toggleBtn:"暂停"
+})
+let upload = null
+let uploadIsRunning = false
+
+
+onBeforeMount(()=>{
+  fly.post("api/newConnect",{}).then( res => {
+    if(res.code == 200){
+      store.dispatch("setUserIdAction",res.data);
+      //返回成功，进行websoket连接登录
+      SocketService.Instance.connect(res.data,"login");
+    }
+  }).catch(err => {
+    store.dispatch("setErrorMsgAction",err.message)
+  })
+})
+const uploadFileFunc = () => {
+  document.getElementById("fileInput").click();
+}
+const reset = () =>{
+  pageState.value = "noStart";
+  upload = null
+  uploadIsRunning = false
+}
+const startUploadFileFunc = (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    return
+  }
+  if (!tus.isSupported) {
+    alert('This browser does not support uploads. Please use a modern browser instead.')
+    return
+  }
+  state.fileName = file.name;
+  const endpoint = "http://localhost:10000/files/";
+  let chunkSize = Infinity
+  let parallelUploads = 1
+  const options = {
+    endpoint,
+    chunkSize,
+    retryDelays: [0, 1000, 3000, 5000],
+    parallelUploads,
+    metadata: {
+      'Content-Type': 'application/json',
+      filename: file.name,
+      filetype: file.type,
+    },
+    headers:{
+      Authorization:store.getters.getUserId
+    },
+    onError(error) {
+      toaster.error(`文件过大，限制上传大小为1GB`);
+      reset()
+    },
+    onProgress(bytesUploaded, bytesTotal) {
+      pageState.value = "progress";
+      const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
+      state.progressBar = `${percentage}%`
+      state.progressText = `Uploaded ${utils.bytesToSize(bytesUploaded)} of ${utils.bytesToSize(bytesTotal)} (${percentage}%)`
+    },
+    onSuccess(event) {
+      fly.get("api/complete/"+utils.getLastSegmentFromUrl(upload.url),{}).then( res => {
+        if(res.code == 200){
+          state.fileInfo = res.data;
+          pageState.value = "finished"
+          state.shareUrl = res.data.shareUrl
+        }
+      }).catch(err => {
+        reset()
+      })
+    }
+  }
+  upload = new tus.Upload(file, options)
+  upload.findPreviousUploads().then((previousUploads) => {
+    //askToResumeUpload(previousUploads, upload)
+    upload.start()
+    uploadIsRunning = true
+  })
+}
+
+const pauseUploadFileFunc = (event) => {
+  event.preventDefault();
+  if (upload) {
+    if (uploadIsRunning) {
+      upload.abort()
+      state.toggleBtn = '继续'
+      uploadIsRunning = false
+    } else {
+      upload.start()
+      state.toggleBtn = '暂停'
+      uploadIsRunning = true
+    }
+  }
+}
+const copyCode = async () => {
+  try {
+    await toClipboard(state.shareUrl).then(()=>{
+      toaster.success(`复制成功`);
+    }).catch(()=>{
+      toaster.error(`复制失败`);
+    });
+  } catch(e){
+    //console.log(e);
+  }
+}
 
 </script>
 
 <template>
 <div class="main">
   <div class="main-upload">
-    <div class="main-upload-noStart" v-if="false"><button>选择一个文件</button></div>
-    <div class="main-upload-process" v-if="true">
+    <div class="main-upload-noStart" v-if="pageState == 'error'">error</div>
+
+    <div class="main-upload-noStart" v-if="pageState == 'noStart'">
+      <button @click="uploadFileFunc">select a file</button>
+      <input style="display: none" type="file" id="fileInput" @change="startUploadFileFunc" />
+    </div>
+    <div class="main-upload-process"  v-if="pageState == 'progress'">
       <div class="main-upload-process-loading">
-        <p class="main-upload-process-loading__tips">上传进行中:</p>
+        <p class="main-upload-process-loading__tips">Uploading:</p>
         <div class="main-upload-process-loading__row">
           <div class="main-upload-process-loading__row-progress">
-            <div class="main-upload-process-loading__row-progress-bar" style="width: 85.69%;"></div>
+            <div class="main-upload-process-loading__row-progress-bar" :style="{width:state.progressBar}"></div>
           </div>
-          <button class="main-upload-process-loading__row-pause">暂停</button>
+          <button @click="pauseUploadFileFunc" class="main-upload-process-loading__row-pause">{{state.toggleBtn}}</button>
         </div>
-        <p class="main-upload-process-loading__text">Uploaded 8.52 MB of 9.01 MB (94.60%)</p>
+        <p class="main-upload-process-loading__text">{{state.progressText}}</p>
       </div>
     </div>
-    <div class="main-upload-finished" v-if="false">
-      <p class="main-upload-finished-fileName">charles-proxy-4.6.4_amd64.tar.gz</p>
+    <div class="main-upload-finished"  v-if="pageState == 'finished'">
+      <p class="main-upload-finished-fileName">{{state.fileName}}</p>
       <p class="main-upload-finished-fileInfo">
-        <span>Peers: </span>
-        <span>0</span>
-        <span> · Up: </span>
-        <span>0 Bytes</span>
+        <span>Size: </span>
+        <span>{{utils.bytesToSize(state.fileInfo.file_size)}}</span>
+        <span> · ExpTime: </span>
+        <count-down :end-time="state.fileInfo.expired_time"></count-down>
       </p>
       <div class="main-upload-finished-tempLink">
         <div class="main-upload-finished-tempLink-urls">
           <div class="main-upload-finished-tempLink-urls__url">
-            <input readonly="" type="text" value="https://file.pizza/squid/gorgonzola/mushrooms/fungi">
+            <input @click="copyCode" readonly="" type="text" :value="state.shareUrl">
           </div>
           <div class="main-upload-finished-tempLink-urls__tips">
-            <span>复制以上链接下载。请勿离开本页面，否则下载链接失效</span>
+            <span>复制以上链接下载。文件有效期为24小时，请在有效期内下载，否则链接失效</span>
           </div>
         </div>
       </div>
